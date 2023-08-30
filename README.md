@@ -4,7 +4,8 @@
 
 <!--!!END -->
 <!--!!ADD -->
-<!-- # `<Mod 4 Project>` -->
+
+# Mod 4 Project
 
 <!--!!END_ADD -->
 
@@ -19,7 +20,9 @@
 
 <!--!!END -->
 <!--!!ADD -->
-<!-- `<insert database schema design here>` -->
+
+[db-schema]: airbnb-db-schema
+
 <!--!!END_ADD -->
 
 ## API Documentation
