@@ -7,7 +7,7 @@ const { setTokenCookie, restoreUser } = require(`../../utils/auth`);
 const { User } = require(`../../db/models`);
 
 const router = express.Router();
-
+//! I DON'T KNOW IF I SHOULD BE KEEPING THIS (BELOW)
 router.post(`/`, async (req, res, next) => {
   const { credential, password } = req.body;
 
@@ -34,6 +34,8 @@ router.post(`/`, async (req, res, next) => {
 
   return res.json({ user: safeUser });
 });
+
+//! I DON'T KNOW IF I SHOULD BE KEEPING THIS (ABOVE)
 
 router.delete(`/`, (req, res) => {
   res.clearCookie(`token`);
