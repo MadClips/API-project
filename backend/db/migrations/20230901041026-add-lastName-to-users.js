@@ -9,7 +9,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.addColumn(`Users`, `lastName`, {
       type: Sequelize.STRING,
-    });
+    },options);
   },
 
   async down(queryInterface, Sequelize) {
