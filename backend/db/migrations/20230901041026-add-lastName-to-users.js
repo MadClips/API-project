@@ -4,12 +4,13 @@ let options = {};
 if (process.env.NODE_ENV === "production") {
   options.schema = process.env.SCHEMA; // define your schema in options object
 }
+option.tableName = `Users`;
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn(`Users`, `lastName`, {
+    await queryInterface.addColumn(options, `lastName`, {
       type: Sequelize.STRING,
-    },options);
+    });
   },
 
   async down(queryInterface, Sequelize) {
