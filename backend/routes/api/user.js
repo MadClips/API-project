@@ -28,11 +28,15 @@ const router = express.Router();
 const { check } = require(`express-validator`);
 const { handleValidationErrors } = require(`../../utils/validation`);
 
+//! I ADDED A FIRST AND LAST NAME TO THE VALIDATE SIGNUP VARIABLE
+
 const validateSignup = [
   check("email")
     .exists({ checkFalsy: true })
     .isEmail()
     .withMessage("Please provide a valid email."),
+  check("firstName").exists({ checkFalsy: true }),
+  check("lastName").exists({ checkFalsy: true }),
   check("username")
     .exists({ checkFalsy: true })
     .isLength({ min: 4 })
@@ -50,9 +54,12 @@ router.post("", validateSignup, async (req, res) => {
   const hashedPassword = bcrypt.hashSync(password);
   const user = await User.create({ email, username, hashedPassword });
 
+  //! I ADDED A FIRST AND LAST NAME TO THE SAFE USER VARIABLE
   const safeUser = {
     id: user.id,
     email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
     username: user.username,
   };
 

@@ -45,8 +45,11 @@ router.delete(`/`, (req, res) => {
 router.get(`/`, (req, res) => {
   const { user } = req;
   if (user) {
+    //! I ADDED A FIRST AND LAST NAME TO THE SAFE USER VARIABLE
     const safeUser = {
       id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
       email: user.email,
       user: user.username,
     };
@@ -89,9 +92,11 @@ router.post("/", validateLogin, async (req, res, next) => {
     err.errors = { credential: "The provided credentials were invalid." };
     return next(err);
   }
-
+  //! I ADDED A FIRST AND LAST NAME TO THE SAFE USER VARIABLE
   const safeUser = {
     id: user.id,
+    firstName: user.firstName,
+    lastName: user.lastName,
     email: user.email,
     username: user.username,
   };
