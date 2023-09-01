@@ -7,35 +7,6 @@ const { setTokenCookie, restoreUser } = require(`../../utils/auth`);
 const { User } = require(`../../db/models`);
 
 const router = express.Router();
-//! I DON'T KNOW IF I SHOULD BE KEEPING THIS (BELOW)
-router.post(`/`, async (req, res, next) => {
-  const { credential, password } = req.body;
-
-  const user = await User.unscoped().findOne({
-    where: {
-      [Op.or]: {
-        username: credential,
-        email: credential,
-      },
-    },
-  });
-
-  if (!user || !bcrypt.compareSync(password, user.hashedPassword.toString())) {
-    const err = new Error(`Login failed`);
-    err.status = 401;
-    err.title = `Login failed`;
-    err.errors = { credential: `The provided credentials were invalid` };
-    return next(err);
-  }
-
-  const safeUser = { id: user.id, email: user.email, username: user.username };
-
-  await setTokenCookie(res, safeUser);
-
-  return res.json({ user: safeUser });
-});
-
-//! I DON'T KNOW IF I SHOULD BE KEEPING THIS (ABOVE)
 
 router.delete(`/`, (req, res) => {
   res.clearCookie(`token`);
@@ -44,8 +15,8 @@ router.delete(`/`, (req, res) => {
 
 router.get(`/`, (req, res) => {
   const { user } = req;
+
   if (user) {
-    //! I ADDED A FIRST AND LAST NAME TO THE SAFE USER VARIABLE
     const safeUser = {
       id: user.id,
       firstName: user.firstName,
@@ -53,10 +24,13 @@ router.get(`/`, (req, res) => {
       email: user.email,
       user: user.username,
     };
+
     return res.json({
       user: safeUser,
     });
+
   } else return res.json({ user: null });
+
 });
 
 const { check } = require(`express-validator`);
@@ -92,7 +66,7 @@ router.post("/", validateLogin, async (req, res, next) => {
     err.errors = { credential: "The provided credentials were invalid." };
     return next(err);
   }
-  //! I ADDED A FIRST AND LAST NAME TO THE SAFE USER VARIABLE
+
   const safeUser = {
     id: user.id,
     firstName: user.firstName,

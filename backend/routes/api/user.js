@@ -7,28 +7,8 @@ const { User } = require(`../../db/models`);
 
 const router = express.Router();
 
-// router.post(`/`, async (req, res) => {
-//   const { email, password, username } = req.body;
-//   const hashedPassword = bcrypt.hashSync(password);
-//   const user = await User.create({ email, username, hashedPassword });
-
-//   const safeUser = {
-//     id: user.id,
-//     email: user.email,
-//     username: user.username,
-//   };
-
-//   await setTokenCookie(res, safeUser);
-
-//   return res.json({
-//     user: safeUser,
-//   });
-// });
-
 const { check } = require(`express-validator`);
 const { handleValidationErrors } = require(`../../utils/validation`);
-
-//! I ADDED A FIRST AND LAST NAME TO THE VALIDATE SIGNUP VARIABLE
 
 const validateSignup = [
   check("email")
@@ -49,12 +29,17 @@ const validateSignup = [
   handleValidationErrors,
 ];
 
-router.post("", validateSignup, async (req, res) => {
-  const { email, password, username } = req.body;
+router.post("/", validateSignup, async (req, res) => {
+  const { email, password, username, firstName, lastName } = req.body;
   const hashedPassword = bcrypt.hashSync(password);
-  const user = await User.create({ email, username, hashedPassword });
+  const user = await User.create({
+    email,
+    username,
+    hashedPassword,
+    firstName,
+    lastName,
+  });
 
-  //! I ADDED A FIRST AND LAST NAME TO THE SAFE USER VARIABLE
   const safeUser = {
     id: user.id,
     email: user.email,
