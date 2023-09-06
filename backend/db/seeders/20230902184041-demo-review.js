@@ -16,16 +16,34 @@ module.exports = {
         stars: 3,
       },
       {
+        spotId: 1,
+        userId: 2,
+        review: `This spot was ok.`,
+        stars: 4,
+      },
+      {
         spotId: 2,
         userId: 2,
         review: `This spot was great.`,
         stars: 4,
       },
       {
+        spotId: 2,
+        userId: 3,
+        review: `This spot was great.`,
+        stars: 5,
+      },
+      {
         spotId: 3,
         userId: 3,
         review: `This spot was amazing.`,
         stars: 5,
+      },
+      {
+        spotId: 3,
+        userId: 1,
+        review: `This spot was amazing.`,
+        stars: 6,
       },
     ]);
   },
