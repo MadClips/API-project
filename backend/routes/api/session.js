@@ -22,15 +22,13 @@ router.get(`/`, (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      user: user.username,
+      username: user.username,
     };
 
-    return res.json({
+    return res.status(200).json({
       user: safeUser,
     });
-
   } else return res.json({ user: null });
-
 });
 
 const { check } = require(`express-validator`);
@@ -60,7 +58,7 @@ router.post("/", validateLogin, async (req, res, next) => {
   });
 
   if (!user || !bcrypt.compareSync(password, user.hashedPassword.toString())) {
-    const err = new Error("Login failed");
+    const err = new Error("Invalid credentials");
     err.status = 401;
     err.title = "Login failed";
     err.errors = { credential: "The provided credentials were invalid." };
