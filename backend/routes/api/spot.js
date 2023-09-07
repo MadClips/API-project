@@ -177,7 +177,7 @@ router.post(`/:spotId/images`, requireAuth, async (req, res, _next) => {
     url,
     preview,
   });
-
+  await currentSpot.save();
   const newImageData = newImage.toJSON();
 
   delete newImageData.spotId;
