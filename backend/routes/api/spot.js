@@ -157,7 +157,7 @@ const validateSpot = [
 
 //* CREATE AN IMAGE FOR A SPOT USING SPOT ID
 
-router.post(`/:spotId/images`, requireAuth, async (req, res, next) => {
+router.post(`/:spotId/images`, requireAuth, async (req, res, _next) => {
   const currentSpot = await Spot.findByPk(req.params.spotId);
 
   if (!currentSpot) {
@@ -188,7 +188,7 @@ router.post(`/:spotId/images`, requireAuth, async (req, res, next) => {
 });
 
 //* CREATE A SPOT
-router.post(`/`, requireAuth, validateSpot, async (req, res, next) => {
+router.post(`/`, requireAuth, validateSpot, async (req, res, _next) => {
   const {
     address,
     ownerId,
@@ -217,6 +217,56 @@ router.post(`/`, requireAuth, validateSpot, async (req, res, next) => {
     return res.status(400).json();
   }
   res.status(201).json(newSpot);
+});
+
+//* EDIT A SPOT
+router.put(`/:spotId`, requireAuth, validateSpot, async (req, res, _next) => {
+  const currentSpot = await Spot.findByPk(req.params.spotId);
+
+  if (!currentSpot) {
+    return res.status(404).json({ message: `Spot couldn't be found` });
+  }
+
+  const currentUserId = req.user.dataValues.id;
+
+  const currentSpotOwnerId = currentSpot.dataValues.ownerId;
+
+  if (currentUserId !== currentSpotOwnerId) {
+    return res.status(403).json({ message: `Forbidden` });
+  }
+
+  const { address, city, state, country, lat, lng, name, description, price } =
+    req.body;
+  if (address) {
+    currentSpot.address = address;
+  }
+  if (city) {
+    currentSpot.city = city;
+  }
+  if (state) {
+    currentSpot.state = state;
+  }
+  if (country) {
+    currentSpot.country = country;
+  }
+  if (lat) {
+    currentSpot.lat = lat;
+  }
+  if (lng) {
+    currentSpot.lng = lng;
+  }
+  if (name) {
+    currentSpot.name = name;
+  }
+  if (description) {
+    currentSpot.description = description;
+  }
+  if (price) {
+    currentSpot.price = price;
+  }
+
+  await currentSpot.save();
+  return res.status(200).json(currentSpot);
 });
 
 module.exports = router;
