@@ -150,6 +150,18 @@ router.get(`/`, async (_req, res, _next) => {
   res.status(200).json({ Spots: listOfSpots });
 });
 
+const validateReview = [
+  check("review")
+    .exists({ checkFalsy: true })
+    .withMessage("Review text is required"),
+  check("stars")
+    .exists({ checkFalsy: true })
+    .isNumeric()
+    .isLength({ min: 1, max: 5 })
+    .withMessage("Stars must be an integer from 1 to 5"),
+  handleValidationErrors,
+];
+
 const validateSpot = [
   check("address")
     .exists({ checkFalsy: true })
@@ -179,6 +191,54 @@ const validateSpot = [
     .withMessage("Price per day is required"),
   handleValidationErrors,
 ];
+
+//* CREATE A REVIEW FOR A SPOT USING SPOT ID
+
+router.post(
+  `/:spotId/reviews`,
+  requireAuth,
+  validateReview,
+  async (req, res, _next) => {
+    const currentSpot = await Spot.findByPk(req.params.spotId, {
+      include: [{ model: Review }],
+    });
+
+    if (!currentSpot) {
+      return res.status(404).json({ message: `Spot couldn't be found` });
+    }
+
+    const currentUserId = req.user.dataValues.id;
+
+    let listOfReviews = [];
+
+    const reviews = currentSpot.dataValues.Reviews;
+
+    reviews.forEach((review) => {
+      listOfReviews.push(review.toJSON());
+    });
+
+    for (let i = 0; i < listOfReviews.length; i++) {
+      if (listOfReviews[i].userId === currentUserId) {
+        return res
+          .status(500)
+          .json({ message: `User already has a review for this spot` });
+      }
+    }
+
+    const { review, stars } = req.body;
+
+    const newReview = await currentSpot.createReview({
+      userId: currentUserId,
+      spotId: req.params.spotId,
+      review,
+      stars,
+    });
+
+    await currentSpot.save();
+
+    return res.status(201).json(newReview);
+  }
+);
 
 //* CREATE AN IMAGE FOR A SPOT USING SPOT ID
 
