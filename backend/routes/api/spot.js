@@ -209,14 +209,6 @@ router.post(
 
     const currentUserId = req.user.dataValues.id;
 
-    const currentSpotOwnerId = currentSpot.dataValues.ownerId;
-
-    if (currentUserId !== currentSpotOwnerId) {
-      return res.status(403).json({ message: `Forbidden` });
-    }
-
-    //! LOOK HERE
-
     let listOfReviews = [];
 
     const reviews = currentSpot.dataValues.Reviews;
@@ -233,7 +225,6 @@ router.post(
       }
     }
 
-    //! LOOK HERE
     const { review, stars } = req.body;
 
     const newReview = await currentSpot.createReview({
