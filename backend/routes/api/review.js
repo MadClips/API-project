@@ -146,4 +146,25 @@ router.put(
   }
 );
 
+//* DELETE REVIEW ROUTE
+
+router.delete(`/:reviewId`, requireAuth, async (req, res, next) => {
+  const currentReview = await Review.findByPk(req.params.reviewId);
+  if (!currentReview) {
+    return res.status(404).json({ message: `Review couldn't be found` });
+  }
+
+  const currentUserId = req.user.dataValues.id;
+
+  const currentReviewUserId = currentReview.dataValues.userId;
+
+  if (currentUserId !== currentReviewUserId) {
+    return res.status(403).json({ message: `Forbidden` });
+  }
+
+  await currentReview.destroy();
+
+  res.status(200).json({ message: `Successfully deleted` });
+});
+
 module.exports = router;
