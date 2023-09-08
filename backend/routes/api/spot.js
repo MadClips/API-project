@@ -9,7 +9,7 @@ const {
   User,
   ReviewImage,
   Booking,
-  sequelize,
+  Sequelize,
 } = require(`../../db/models`);
 
 const { check } = require(`express-validator`);
@@ -142,12 +142,76 @@ router.get(`/:spotId`, async (req, res, _next) => {
   return res.status(200).json(spotData);
 });
 //* GET ALL SPOTS
+//! BELOW
+const validateQuery = [
+  check("page")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Page must be greater than or equal to 1"),
+  check("size")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Size must be greater than or equal to 1"),
+  check("maxLat")
+    .optional()
+    .isFloat()
+    .withMessage("Maximum latitude is invalid"),
+  check("minLat")
+    .optional()
+    .isFloat()
+    .withMessage("Minimum latitude is invalid"),
+  check("minLng")
+    .optional()
+    .isFloat()
+    .withMessage("Minimum longitude is invalid"),
+  check("maxLng")
+    .optional()
+    .isFloat()
+    .withMessage("Maximum longitude is invalid"),
+  check("minPrice")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Minimum price must be greater than or equal to 0"),
+  check("maxPrice")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("Maximum price must be greater than or equal to 0"),
+  handleValidationErrors,
+];
 
-router.get(`/`, async (_req, res, _next) => {
-  const spots = await Spot.findAll({
+router.get(`/`, validateQuery, async (req, res, _next) => {
+  let { page, size, minLat, maxLat, minLng, maxLng, minPrice, maxPrice } =
+    req.query;
+
+  if (!page) page = 1;
+  if (!size) size = 20;
+  let pagination = {};
+  if (page >= 1 && page <= 10) {
+    pagination.offset = (page - 1) * size;
+  }
+  if (size >= 1 && size <= 20) {
+    pagination.limit = size;
+  }
+  let queryObj = {
+    where: {},
     include: [{ model: Review }, { model: SpotImage }],
-  });
+    ...pagination,
+  };
 
+  if (minLat && maxLat) {
+    query.where.lat = { [Sequelize.Op.between]: [minLat, maxLat] };
+  }
+
+  if (minLng && maxLng) {
+    query.where.lng = { [Sequelize.Op.between]: [minLng, maxLng] };
+  }
+
+  if (minPrice !== undefined && maxPrice !== undefined) {
+    query.where.price = { [Sequelize.Op.between]: [minPrice, maxPrice] };
+  }
+
+  const spots = await Spot.findAll(queryObj);
+  console.log(spots);
   let listOfSpots = [];
 
   spots.forEach((spot) => {
@@ -178,8 +242,14 @@ router.get(`/`, async (_req, res, _next) => {
     });
   });
 
-  res.status(200).json({ Spots: listOfSpots });
+  console.log(listOfSpots);
+
+  res
+    .status(200)
+    .json({ Spots: listOfSpots, page: parseInt(page), size: parseInt(size) });
 });
+
+//!ABOVE
 
 const validateReview = [
   check("review")
@@ -187,8 +257,7 @@ const validateReview = [
     .withMessage("Review text is required"),
   check("stars")
     .exists({ checkFalsy: true })
-    .isNumeric()
-    .isLength({ min: 1, max: 5 })
+    .isInt({ min: 1, max: 5 })
     .withMessage("Stars must be an integer from 1 to 5"),
   handleValidationErrors,
 ];
