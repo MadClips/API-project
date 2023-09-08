@@ -2,7 +2,14 @@ const express = require(`express`);
 
 const { requireAuth } = require(`../../utils/auth`);
 
-const { Spot, SpotImage, Review, User, sequelize } = require(`../../db/models`);
+const {
+  Spot,
+  SpotImage,
+  Review,
+  User,
+  ReviewImage,
+  sequelize,
+} = require(`../../db/models`);
 
 const { check } = require(`express-validator`);
 const { handleValidationErrors } = require(`../../utils/validation`);
@@ -47,6 +54,24 @@ router.get(`/current`, requireAuth, async (req, res, _next) => {
     });
   });
   return res.status(200).json({ Spots: listOfSpots });
+});
+
+//* GET REVIEWS BY SPOT ID
+
+router.get(`/:spotId/reviews`, async (req, res, next) => {
+  const spot = await Spot.findByPk(req.params.spotId);
+  if (!spot) {
+    return res.status(404).json({ message: `Spot couldn't be found` });
+  }
+  const reviews = await Review.findAll({
+    where: { spotId: req.params.spotId },
+    include: [
+      { model: User, attributes: [`id`, `firstName`, `lastName`] },
+      { model: ReviewImage, attributes: [`id`, `url`] },
+    ],
+  });
+
+  res.status(200).json({ Reviews: reviews });
 });
 
 //* GET DETAILS BY SPOT ID

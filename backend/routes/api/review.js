@@ -12,8 +12,6 @@ const {
 
 const router = express.Router();
 
-module.exports = router;
-
 //* GET REVIEWS BY CURRENT USER
 router.get(`/current`, requireAuth, async (req, res, next) => {
   const currentUserId = req.user.dataValues.id;
@@ -56,3 +54,5 @@ router.get(`/current`, requireAuth, async (req, res, next) => {
 
   return res.status(200).json({ Reviews: listOfReviews });
 });
+
+module.exports = router;
