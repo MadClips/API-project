@@ -10,6 +10,9 @@ const {
   SpotImage,
 } = require(`../../db/models`);
 
+const { check } = require(`express-validator`);
+const { handleValidationErrors } = require(`../../utils/validation`);
+
 const router = express.Router();
 
 //* GET REVIEWS BY CURRENT USER
@@ -54,5 +57,49 @@ router.get(`/current`, requireAuth, async (req, res, next) => {
 
   return res.status(200).json({ Reviews: listOfReviews });
 });
+
+const validateUrl = [
+  check("url").exists({ checkFalsy: true }).withMessage("Url required"),
+  handleValidationErrors,
+];
+
+//* CREATE IMAGE BASED ON REVIEW ID
+
+router.post(
+  `/:reviewId/images`,
+  requireAuth,
+  validateUrl,
+  async (req, res, next) => {
+    const review = await Review.findByPk(req.params.reviewId, {
+      include: { model: ReviewImage },
+    });
+
+    if (!review) {
+      return res.status(404).json({ message: `Review couldn't be found` });
+    }
+
+    const { url } = req.body;
+
+    let listOfImages = [];
+    const images = review.dataValues.ReviewImages;
+    images.forEach((image) => {
+      listOfImages.push(image.toJSON());
+    });
+
+    if (listOfImages.length === 10) {
+      return res.status(403).json({
+        message: `maximum number of images for this resource was reached`,
+      });
+    }
+
+    const newImage = await review.createReviewImage({
+      url,
+    });
+
+    await review.save();
+
+    return res.status(200).json(newImage);
+  }
+);
 
 module.exports = router;
