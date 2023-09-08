@@ -165,4 +165,34 @@ router.put(
   }
 );
 
+//* DELETE A BOOKING
+router.delete(`/:bookingId`, requireAuth, async (req, res, next) => {
+  const currentBooking = await Booking.findByPk(req.params.bookingId);
+  if (!currentBooking) {
+    return res.status(404).json({ message: `Booking couldn't be found` });
+  }
+  const currentUserId = req.user.dataValues.id;
+  const currentBookingUserId = currentBooking.dataValues.userId;
+  if (currentUserId !== currentBookingUserId) {
+    return res.status(403).json({ message: `Forbidden` });
+  }
+
+  const currentDate = new Date();
+  const currentDateTime = currentDate.getTime();
+
+  const currentBookingStartDate = currentBooking.dataValues.startDate;
+  const currentBookingEndDate = currentBooking.dataValues.endDate;
+
+  const currentBookingStartDateTime = currentBookingStartDate.getTime();
+  const currentBookingEndDateTime = currentBookingEndDate.getTime();
+
+  if (currentBookingStartDateTime < currentDateTime) {
+    return res
+      .status(403)
+      .json({ message: `Bookings that have been started can't be deleted` });
+  }
+
+  await currentBooking.destroy();
+  res.status(200).json({ message: `Successfully deleted` });
+});
 module.exports = router;
