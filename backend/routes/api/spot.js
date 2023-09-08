@@ -253,7 +253,7 @@ router.post(
     const currentBookingStartDateTime = currentBookingStartDate.getTime();
     const currentBookingEndDateTime = currentBookingEndDate.getTime();
 
-    if (currentBookingStartDateTime > currentBookingEndDateTime) {
+    if (currentBookingStartDateTime >= currentBookingEndDateTime) {
       return res.status(400).json({
         message: "Bad Request",
         errors: {
