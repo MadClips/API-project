@@ -12,6 +12,7 @@ const {
 
 const { check } = require(`express-validator`);
 const { handleValidationErrors } = require(`../../utils/validation`);
+const { route } = require("./spot");
 
 const router = express.Router();
 
@@ -63,6 +64,16 @@ const validateUrl = [
   handleValidationErrors,
 ];
 
+const validateReview = [
+  check("review")
+    .exists({ checkFalsy: true })
+    .withMessage("Review text is required"),
+  check("stars")
+    .exists({ checkFalsy: true })
+    .withMessage("Stars must be an integer from 1 to 5"),
+  handleValidationErrors,
+];
+
 //* CREATE IMAGE BASED ON REVIEW ID
 
 router.post(
@@ -99,6 +110,39 @@ router.post(
     await review.save();
 
     return res.status(200).json(newImage);
+  }
+);
+
+//* EDIT A REVIEW
+
+router.put(
+  `/:reviewId`,
+  requireAuth,
+  validateReview,
+  async (req, res, next) => {
+    const currentReview = await Review.findByPk(req.params.reviewId);
+    if (!currentReview) {
+      return res.status(404).json({ message: `Review couldn't be found` });
+    }
+
+    const currentUserId = req.user.dataValues.id;
+
+    const currentReviewUserId = currentReview.dataValues.userId;
+
+    if (currentUserId !== currentReviewUserId) {
+      return res.status(403).json({ message: `Forbidden` });
+    }
+    const { review, stars } = req.body;
+
+    if (review) {
+      currentReview.review = review;
+    }
+    if (stars) {
+      currentReview.stars = stars;
+    }
+
+    await currentReview.save();
+    return res.status(200).json(currentReview);
   }
 );
 
