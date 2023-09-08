@@ -8,6 +8,7 @@ const {
   Review,
   User,
   ReviewImage,
+  Booking,
   sequelize,
 } = require(`../../db/models`);
 
@@ -54,6 +55,36 @@ router.get(`/current`, requireAuth, async (req, res, _next) => {
     });
   });
   return res.status(200).json({ Spots: listOfSpots });
+});
+
+//* GET BOOKINGS BY SPOT ID
+
+router.get(`/:spotId/bookings`, requireAuth, async (req, res, next) => {
+  const spot = await Spot.findByPk(req.params.spotId);
+
+  if (!spot) {
+    return res.status(404).json({ message: `Spot couldn't be found` });
+  }
+
+  const currentUserId = req.user.dataValues.id;
+
+  const currentSpotOwnerId = spot.dataValues.ownerId;
+
+  if (currentUserId !== currentSpotOwnerId) {
+    console.log("Hello?");
+    const bookings = await Booking.findAll({
+      where: { spotId: req.params.spotId },
+      attributes: [`spotId`, `startDate`, `endDate`],
+    });
+    return res.status(200).json({ Bookings: bookings });
+  }
+
+  const bookings = await Booking.findAll({
+    where: { spotId: req.params.spotId },
+    include: [{ model: User, attributes: [`id`, `firstName`, `lastName`] }],
+  });
+
+  return res.status(200).json({ Bookings: bookings });
 });
 
 //* GET REVIEWS BY SPOT ID
