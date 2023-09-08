@@ -2,14 +2,7 @@ const express = require(`express`);
 
 const { requireAuth } = require(`../../utils/auth`);
 
-const {
-  User,
-  Spot,
-  Booking,
-  Review,
-  SpotImage,
-  ReviewImage,
-} = require(`../../db/models`);
+const { Spot, SpotImage } = require(`../../db/models`);
 
 const router = express.Router();
 
